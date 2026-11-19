@@ -1,0 +1,8 @@
+# ---> Begin: placeholder for gradlew wrapper script.
+# This project ships the standard Gradle wrapper properties.
+# Run `./gradlew wrapper` once in Android Studio, or download the
+# official gradlew / gradlew.bat scripts from a Gradle distribution
+# and place them at the project root, then run:
+#   ./gradlew assembleDebug
+# The wrapper jar is intentionally not committed here; Android Studio
+# generates it on first import. See README.md.
