@@ -151,7 +151,8 @@ object PrivacyGuard {
             for (packageOps in packageOpsList) {
                 val pkg = packageOps.packageName ?: continue
                 if (pkg == context.packageName) continue
-                for (opEntry in packageOps.ops) {
+                val opEntries: List<AppOpsManager.OpEntry> = packageOps.getOps()
+                for (opEntry in opEntries) {
                     val opName = WATCHED_OPS[opEntry.op] ?: continue
                     val lastTime = opEntry.time
                     // Also surface an op that is running right now,
