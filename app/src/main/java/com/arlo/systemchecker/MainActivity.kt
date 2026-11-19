@@ -1,7 +1,9 @@
 package com.arlo.systemchecker
 
+import android.Manifest
 import android.app.PictureInPictureParams
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
@@ -9,6 +11,7 @@ import android.util.Rational
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.arlo.systemchecker.databinding.ActivityMainBinding
@@ -30,12 +33,16 @@ import kotlinx.coroutines.launch
  *   can be dragged and resized like a window.
  * - Privacy Guard: alerts for mic/camera/SMS/call-log access by
  *   non-trusted apps. Trusted = system app or Play Store install.
+ * - Cell tower log: serving tower changes (network type, cell ID,
+ *   TAC/LAC, signal, operator) via CellTowerLogger. It cannot
+ *   verify a tower is genuine — Android exposes no such check.
  * - NO audio anywhere. No chime, beep, or spoken line on open.
  */
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var repository: ProcessRepository
+    private lateinit var cellTowerLogger: CellTowerLogger
     private val adapter = ProcessAdapter()
     private var filter: Filter = Filter.ALL
     private var allProcesses: List<ProcessInfo> = emptyList()
@@ -43,6 +50,16 @@ class MainActivity : AppCompatActivity() {
     private enum class Filter { ALL, FOREGROUND, BACKGROUND }
 
     private val alertListener: () -> Unit = { runOnUiThread { renderAlerts() } }
+    private val towerListener: () -> Unit = { runOnUiThread { renderTowerLog() } }
+
+    companion object {
+        private const val REQUEST_CELL_PERMISSIONS = 1001
+        private val CELL_PERMISSIONS = arrayOf(
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,6 +83,14 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
         }
 
+        // Cell tower logging: view-only, public APIs only. Starts
+        // alongside Privacy Guard; see CellTowerLogger for limits.
+        cellTowerLogger = CellTowerLogger(this)
+        cellTowerLogger.start()
+        CellTowerStore.addListener(towerListener)
+        binding.grantCellAccessButton.setOnClickListener { requestCellPermissions() }
+        if (!hasCellPermissions()) requestCellPermissions()
+
         // Privacy Guard runs in the foreground service so alerts keep
         // coming while the app is in the background / windowed.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -87,7 +112,33 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         PrivacyAlertStore.removeListener(alertListener)
+        CellTowerStore.removeListener(towerListener)
+        if (::cellTowerLogger.isInitialized) cellTowerLogger.stop()
         super.onDestroy()
+    }
+
+    private fun hasCellPermissions(): Boolean =
+        CELL_PERMISSIONS.all {
+            ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
+        }
+
+    private fun requestCellPermissions() {
+        requestPermissions(CELL_PERMISSIONS, REQUEST_CELL_PERMISSIONS)
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_CELL_PERMISSIONS) {
+            // Re-snapshot now that the user has answered; the logger
+            // records "needs location permission" instead of fake data
+            // if they declined.
+            if (::cellTowerLogger.isInitialized) cellTowerLogger.checkNow()
+            renderTowerLog()
+        }
     }
 
     private fun setFilter(newFilter: Filter) {
@@ -101,6 +152,11 @@ class MainActivity : AppCompatActivity() {
         } else {
             binding.usageAccessWarning.visibility = View.GONE
         }
+        // Cell tower: poll as well as the change callback, so a
+        // missed callback still gets picked up. Deduplicated by
+        // tower identity inside CellTowerLogger.
+        if (::cellTowerLogger.isInitialized) cellTowerLogger.checkNow()
+        renderTowerLog()
         allProcesses = repository.listProcesses()
         val mem = repository.systemMemory()
         val usedMb = (mem.totalMem - mem.availMem) / (1024 * 1024)
@@ -123,6 +179,23 @@ class MainActivity : AppCompatActivity() {
         adapter.submitList(filtered)
         binding.emptyText.visibility =
             if (filtered.isEmpty()) View.VISIBLE else View.GONE
+    }
+
+    private fun renderTowerLog() {
+        if (!::cellTowerLogger.isInitialized) return
+        val error = cellTowerLogger.lastError
+        if (error != null) {
+            binding.cellTowerWarning.visibility = View.VISIBLE
+            binding.cellTowerWarning.text = error
+        } else {
+            binding.cellTowerWarning.visibility = View.GONE
+        }
+        val events = CellTowerStore.snapshot()
+        binding.cellTowerLog.text = if (events.isEmpty()) {
+            "No cell tower change recorded yet."
+        } else {
+            events.take(20).joinToString("\n") { it.displayLine() }
+        }
     }
 
     private fun renderAlerts() {

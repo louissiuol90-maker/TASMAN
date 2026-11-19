@@ -4,4 +4,6 @@
     <string name="honest_limit_note">View-only. Android 10+ does not let an ordinary app list every other app’s process, or read per-process CPU / memory for other apps. This list is the widest view Android allows without system / root access: running processes, running services, and apps used in the last 24 hours (Usage Access). CPU / memory are shown only for this app itself; other rows show “—” instead of invented numbers.</string>
     <string name="usage_access_warning">Usage Access is not granted, so the list will be short. Grant it in Settings to see apps used in the last 24 hours.</string>
     <string name="grant_usage_access">Grant Usage Access</string>
+    <string name="cell_tower_note">Cell tower log: records the serving tower when it changes — network type, cell ID, TAC / LAC, signal and operator. Android gives no way to verify a tower is genuine, so a change is a clue to notice, not proof of a fake tower. Cell IDs need location permission (Android 10+).</string>
+    <string name="grant_cell_access">Grant location / phone access for tower log</string>
 </resources>

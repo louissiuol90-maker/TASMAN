@@ -28,6 +28,18 @@
     <uses-permission android:name="android.permission.GET_APP_OPS_STATS"
         tools:ignore="ProtectedPermissions" />
 
+    <!-- Cell tower logging (CellTowerLogger.kt, view-only).
+         READ_PHONE_STATE: network type / operator name.
+         Location (fine or coarse): Android 10+ hides cell identity
+         (cell ID / TAC / LAC) without location permission, so without
+         it the tower log records "needs location permission" instead
+         of inventing a cell ID. Both are requested at runtime in
+         MainActivity. No location is stored, uploaded, or shared —
+         only the tower identity / signal, in the app's private log. -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
     <!-- Alert notifications (Android 13+). Sound is explicitly disabled
          in the notification channel — no audio on open, no chime, no beep. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />

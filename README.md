@@ -33,6 +33,16 @@ mic / camera / message-log access.
   sideloaded, unverified, web-page access — triggers a red banner,
   an alert-log entry and a silent notification. Trusted access is
   logged as allowed, with no alert.
+- **Cell tower log** — records the serving cell tower when it
+  changes: network type (2G / 3G / 4G / 5G), cell ID, TAC / LAC,
+  signal in dBm, and operator name. Shown in the app and appended
+  to `cell_tower_log.txt` in the app's private storage. No network
+  upload, no root, public Android APIs only
+  (`TelephonyManager` / `TelephonyCallback`, API 31+, with a
+  `PhoneStateListener` fallback). Cell IDs need location
+  permission (Android 10+). **Android gives no way to verify a
+  tower is genuine** — a change (e.g. a sudden drop to 2G, or a
+  new cell ID) is a clue to notice, not proof of a fake tower.
 - **No audio.** No chime, beep, spoken line, MediaPlayer,
   SoundPool or TextToSpeech anywhere in the code. The alert
   notification channel has its sound explicitly set to null.
@@ -53,6 +63,7 @@ android-system-checker/
     ProcessRepository.kt       ActivityManager + RunningServices + UsageStats
     PrivacyGuard.kt            AppOps polling, trusted-app rules, alerts
     PrivacyGuardService.kt     foreground service, polls every 5 s
+    CellTowerLogger.kt         TelephonyCallback / PhoneStateListener, tower log
     ProcessAdapter.kt          RecyclerView adapter
   app/src/main/res/layout/
     activity_main.xml          summary, filters, window buttons, alert log, list
@@ -117,6 +128,8 @@ No Play Store listing is needed.
 | `GET_APP_OPS_STATS` | AppOps history for Privacy Guard. Signature\|privileged — declaring it does not grant it; see "Honest limits". |
 | `POST_NOTIFICATIONS` | Privacy Guard alert notifications (silent). |
 | `VIBRATE` | Haptic feedback for an alert only. No audio. |
+| `READ_PHONE_STATE` | Cell tower log: network type / operator name. |
+| `ACCESS_FINE_LOCATION` / `ACCESS_COARSE_LOCATION` | Cell tower log: cell ID / TAC / LAC. Android 10+ hides cell identity without location permission. No location is stored, uploaded or shared. |
 
 This app requests **no** `READ_SMS`, `READ_CALL_LOG`, `RECORD_AUDIO`
 or `CAMERA` permission, and reads no messages, call logs, photos or
@@ -171,6 +184,12 @@ says the same thing on screen.
    pop-up view where the OS supports it.
 6. **No audio, ever.** If you hear anything on open, it is not
    from this app.
+7. **Cell tower log cannot prove a tower is genuine.** Android
+   exposes no tower credentials or certificates to apps, and no
+   public API verifies tower authenticity. The log shows changes
+   only. A fake tower can mimic 4G/5G, and a real tower can change
+   ID, so treat a sudden 2G drop or a new cell ID as a reason to
+   look closer, not as proof.
 
 ## What was verified in this VM — and what was not
 
