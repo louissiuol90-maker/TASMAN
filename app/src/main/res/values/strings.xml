@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">System Checker</string>
+    <string name="honest_limit_note">View-only. Android 10+ does not let an ordinary app list every other app’s process, or read per-process CPU / memory for other apps. This list is the widest view Android allows without system / root access: running processes, running services, and apps used in the last 24 hours (Usage Access). CPU / memory are shown only for this app itself; other rows show “—” instead of invented numbers.</string>
+    <string name="usage_access_warning">Usage Access is not granted, so the list will be short. Grant it in Settings to see apps used in the last 24 hours.</string>
+    <string name="grant_usage_access">Grant Usage Access</string>
+</resources>
