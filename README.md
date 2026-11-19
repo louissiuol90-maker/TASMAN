@@ -19,13 +19,25 @@ mic / camera / message-log access.
   start / last-used time, and which API the row came from.
   Filters: All / Foreground / Background. No kill, stop, or change
   controls anywhere.
-- **Window mode** — a toggle that shrinks the app into
-  picture-in-picture (the shrink option that reliably works on a
-  phone). The activity is also `resizeableActivity=true`, so on
-  tablets, Samsung DeX / pop-up view and other freeform environments
-  it can be dragged and resized like a window. On a standard phone
-  there is no OS-provided freeform floating window for ordinary
-  apps — PiP is the honest equivalent.
+- **Window mode** — a tiny semi-transparent floating mini-bar
+  ("● Checker") that sits on screen while the app runs in the
+  background. Tap it to open the full app again; drag it anywhere.
+  It is a translucent dark pill (~60% opaque, so you can see
+  through it a bit, like the accessibility button) with fully
+  opaque white text, kept alive by a foreground service.
+  Picture-in-picture is **not** used — it looked like a video /
+  YouTube window. Window mode needs the "Display over other apps"
+  permission (Settings); the app explains if it is not granted.
+  The activity is also `resizeableActivity=true`, so on tablets,
+  Samsung DeX / pop-up view and other freeform environments it
+  can be dragged and resized like a window.
+- **Cleaner interface (v1.2)** — card-style sections with
+  consistent padding, colour-coded headings (blue = Processes,
+  red = Privacy Guard, teal = Cell tower log), equal-width
+  48dp buttons with even spacing, a selected filter button
+  that stands out in solid blue, and process rows as cards with
+  a green Foreground / orange Background chip. Dark mode uses
+  lighter accent colours so everything stays readable.
 - **Privacy Guard** — alerts whenever the microphone or camera is
   accessed, or message logs (SMS / call log) are accessed, by a
   **non-trusted** app. Trusted = (1) system app, or (2) installed
@@ -64,11 +76,13 @@ android-system-checker/
     PrivacyGuard.kt            AppOps polling, trusted-app rules, alerts
     PrivacyGuardService.kt     foreground service, polls every 5 s
     CellTowerLogger.kt         TelephonyCallback / PhoneStateListener, tower log
-    ProcessAdapter.kt          RecyclerView adapter
+    FloatingBarService.kt      translucent floating mini-bar (Window mode), overlay
+    ProcessAdapter.kt          RecyclerView adapter, foreground/background chips
   app/src/main/res/layout/
-    activity_main.xml          summary, filters, window buttons, alert log, list
-    item_process.xml           one process row
-  app/src/main/res/values/     strings, themes, icon background
+    activity_main.xml          card sections, filters, window buttons, alert log, list
+    item_process.xml           one process row as a card
+  app/src/main/res/values/     strings, themes, colors (light + night), icon background
+  app/src/main/res/drawable/   chip_bg.xml, floating_bar_bg.xml (translucent pill)
 ```
 
 ## How to build the APK
@@ -114,9 +128,11 @@ No Play Store listing is needed.
      These are silent by design.
 4. Add it to the home screen like any installed app — long-press
    the icon, or drag it where you want it. No store needed.
-5. Window mode: tap **Window mode** in the app for
-   picture-in-picture. On Samsung, long-press the app in Recents
-   and choose **Open in pop-up view** for a true floating window.
+5. Window mode: tap **Window mode** in the app for the floating
+   mini-bar. First time, allow "Display over other apps" for
+   System Checker in Settings when the app sends you there.
+   On Samsung, long-press the app in Recents and choose
+   **Open in pop-up view** for a true floating window.
 
 ## Permissions — what they do, and what they do NOT do
 
@@ -130,6 +146,8 @@ No Play Store listing is needed.
 | `VIBRATE` | Haptic feedback for an alert only. No audio. |
 | `READ_PHONE_STATE` | Cell tower log: network type / operator name. |
 | `ACCESS_FINE_LOCATION` / `ACCESS_COARSE_LOCATION` | Cell tower log: cell ID / TAC / LAC. Android 10+ hides cell identity without location permission. No location is stored, uploaded or shared. |
+| `SYSTEM_ALERT_WINDOW` | Floating mini-bar (Window mode): draw the small translucent "Checker" bar over other apps. Granted in Settings ("Display over other apps"), not at install. |
+| `FOREGROUND_SERVICE_DATA_SYNC` | Also keeps the floating mini-bar service alive in the background. |
 
 This app requests **no** `READ_SMS`, `READ_CALL_LOG`, `RECORD_AUDIO`
 or `CAMERA` permission, and reads no messages, call logs, photos or
@@ -178,10 +196,14 @@ says the same thing on screen.
    watches `READ_SMS` and `READ_CALL_LOG` AppOps. It cannot see
    in-app messages (WhatsApp, Messenger, etc.) or the content of
    any message.
-5. **Window mode on a phone is PiP.** True freeform floating
-   windows are manufacturer-dependent. The app offers
-   picture-in-picture, plus `resizeableActivity` for DeX / tablets /
-   pop-up view where the OS supports it.
+5. **Window mode is a floating mini-bar, not PiP.**
+   Picture-in-picture was removed — it looked like a video /
+   YouTube window. The mini-bar needs "Display over other apps"
+   permission; without it, the app says so instead of silently
+   failing. True freeform floating windows are
+   manufacturer-dependent; the app also keeps
+   `resizeableActivity` for DeX / tablets / pop-up view where
+   the OS supports it.
 6. **No audio, ever.** If you hear anything on open, it is not
    from this app.
 7. **Cell tower log cannot prove a tower is genuine.** Android

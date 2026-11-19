@@ -1,14 +1,15 @@
 package com.arlo.systemchecker
 
 import android.Manifest
-import android.app.PictureInPictureParams
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Rational
 import android.view.View
+import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -26,8 +27,11 @@ import kotlinx.coroutines.launch
  *   auto-refreshing every 2 seconds. See ProcessRepository for the
  *   honest Android 10+ limits: this is NOT a complete kernel process
  *   list, and per-process CPU/memory for other apps is "—".
- * - Window mode: a toggle that shrinks the activity into
- *   picture-in-picture (the reliable shrink-on-a-phone option).
+ * - Window mode: a tiny semi-transparent floating mini-bar
+ *   ("Checker") drawn over other apps, kept alive by
+ *   FloatingBarService. Tapping it opens the full app again.
+ *   Picture-in-picture is NOT used — it looked like a video /
+ *   YouTube window. Needs "Draw over other apps" permission.
  *   The activity is also resizeableActivity=true, so on tablets,
  *   Samsung DeX / pop-up view and other freeform environments it
  *   can be dragged and resized like a window.
@@ -76,8 +80,9 @@ class MainActivity : AppCompatActivity() {
         binding.filterForeground.setOnClickListener { setFilter(Filter.FOREGROUND) }
         binding.filterBackground.setOnClickListener { setFilter(Filter.BACKGROUND) }
 
-        binding.windowModeButton.setOnClickListener { enterWindowMode() }
+        binding.windowModeButton.setOnClickListener { launchFloatingBar() }
         binding.fullViewButton.setOnClickListener { exitWindowMode() }
+        updateFilterButtons()
 
         binding.grantUsageAccessButton.setOnClickListener {
             startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
@@ -108,6 +113,11 @@ class MainActivity : AppCompatActivity() {
                 delay(2_000L)
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updateFloatingBarWarning()
     }
 
     override fun onDestroy() {
@@ -143,7 +153,41 @@ class MainActivity : AppCompatActivity() {
 
     private fun setFilter(newFilter: Filter) {
         filter = newFilter
+        updateFilterButtons()
         renderList()
+    }
+
+    /** Selected filter button stands out (solid blue); the others stay quiet. */
+    private fun updateFilterButtons() {
+        val buttons = mapOf(
+            binding.filterAll to (filter == Filter.ALL),
+            binding.filterForeground to (filter == Filter.FOREGROUND),
+            binding.filterBackground to (filter == Filter.BACKGROUND)
+        )
+        for ((button, selected) in buttons) {
+            styleFilterButton(button, selected)
+        }
+    }
+
+    private fun styleFilterButton(button: Button, selected: Boolean) {
+        if (selected) {
+            button.backgroundTintList = ColorStateList.valueOf(
+                ContextCompat.getColor(this, R.color.filter_selected_bg)
+            )
+            button.setTextColor(ContextCompat.getColor(this, R.color.filter_selected_text))
+        } else {
+            button.backgroundTintList = ColorStateList.valueOf(
+                ContextCompat.getColor(this, R.color.filter_unselected_bg)
+            )
+            button.setTextColor(ContextCompat.getColor(this, R.color.filter_unselected_text))
+        }
+    }
+
+    private fun updateFloatingBarWarning() {
+        binding.floatingBarWarning.visibility =
+            if (Settings.canDrawOverlays(this)) View.GONE else View.GONE
+        // Only shown when the user actually taps Window mode without
+        // the permission — see launchFloatingBar(). Not nagged on open.
     }
 
     private fun refresh() {
@@ -221,37 +265,39 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * Window mode — picture-in-picture is the shrink option that
-     * actually works on a phone. Freeform floating windows are
-     * manufacturer-dependent (Samsung pop-up view, DeX, tablets);
-     * resizeableActivity=true lets the OS offer those where available.
+     * Window mode — a tiny semi-transparent floating mini-bar, NOT
+     * picture-in-picture. PiP looked like a video / YouTube window
+     * and Louis did not want that, so it is gone entirely.
+     * The bar is drawn over other apps (SYSTEM_ALERT_WINDOW) by
+     * FloatingBarService; tapping it opens the full app again.
+     * If the overlay permission is not granted, we say so in-app
+     * and send the user to Settings — never silently fail.
      */
-    private fun enterWindowMode() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val params = PictureInPictureParams.Builder()
-                .setAspectRatio(Rational(9, 16))
-                .build()
-            val entered = enterPictureInPictureMode(params)
-            if (!entered) {
-                Toast.makeText(
-                    this,
-                    "Picture-in-picture was not available — try split-screen or pop-up view on your device.",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
-        } else {
-            Toast.makeText(this, "Window mode needs Android 8 or later.", Toast.LENGTH_LONG).show()
+    private fun launchFloatingBar() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
+            binding.floatingBarWarning.visibility = View.VISIBLE
+            Toast.makeText(
+                this,
+                "Allow “Display over other apps” for System Checker, then tap Window mode again.",
+                Toast.LENGTH_LONG
+            ).show()
+            val intent = Intent(
+                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                Uri.parse("package:$packageName")
+            )
+            startActivity(intent)
+            return
         }
+        binding.floatingBarWarning.visibility = View.GONE
+        FloatingBarService.start(this)
+        // Send the app to the background so the mini-bar is visible.
+        moveTaskToBack(true)
     }
 
     private fun exitWindowMode() {
-        // Exiting PiP returns to full view; there is no direct API to
-        // force it, so we simply finish the PiP state by recreating.
-        if (isInPictureInPictureMode) {
-            // The system restores full view when the user taps the
-            // expand control; we also offer a full-view button in PiP.
-            Toast.makeText(this, "Tap the expand control to return to full view.", Toast.LENGTH_SHORT).show()
-        }
+        // Full view: hide the floating mini-bar; the full app is
+        // already in front when this button is tapped.
+        FloatingBarService.stop(this)
     }
 
     @Suppress("UNUSED_PARAMETER")

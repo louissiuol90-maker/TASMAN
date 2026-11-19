@@ -6,4 +6,5 @@
     <string name="grant_usage_access">Grant Usage Access</string>
     <string name="cell_tower_note">Cell tower log: records the serving tower when it changes — network type, cell ID, TAC / LAC, signal and operator. Android gives no way to verify a tower is genuine, so a change is a clue to notice, not proof of a fake tower. Cell IDs need location permission (Android 10+).</string>
     <string name="grant_cell_access">Grant location / phone access for tower log</string>
+    <string name="floating_bar_warning">Draw over other apps is not allowed yet, so the mini-bar can’t appear. Allow “Display over other apps” for System Checker in Settings, then tap Window mode again.</string>
 </resources>

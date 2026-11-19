@@ -1,175 +1,296 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:padding="12dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <!-- Header -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/app_name"
+            android:textColor="@color/section_processes"
             android:textSize="24sp"
             android:textStyle="bold" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:paddingTop="4dp"
             android:text="@string/honest_limit_note"
-            android:textSize="13sp"
-            android:paddingTop="8dp" />
+            android:textColor="@color/muted_text"
+            android:textSize="13sp" />
 
-        <TextView
-            android:id="@+id/usageAccessWarning"
+        <!-- Usage access warning -->
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/usage_access_warning"
-            android:textColor="#B00020"
-            android:paddingTop="8dp"
-            android:visibility="gone" />
+            android:layout_marginTop="12dp"
+            app:cardBackgroundColor="@color/warn_bg"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="1dp">
 
-        <Button
-            android:id="@+id/grantUsageAccessButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/grant_usage_access" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp">
 
-        <TextView
-            android:id="@+id/summaryText"
+                <TextView
+                    android:id="@+id/usageAccessWarning"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/usage_access_warning"
+                    android:textColor="@color/warn_amber"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+
+                <Button
+                    android:id="@+id/grantUsageAccessButton"
+                    style="@style/Widget.MaterialComponents.Button"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/grant_usage_access" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Summary -->
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="12dp"
-            android:text="Processes: —" />
+            android:layout_marginTop="12dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="1dp">
 
+            <TextView
+                android:id="@+id/summaryText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="12dp"
+                android:text="Processes: —"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- View controls: equal-width, evenly distributed -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingTop="8dp">
-
-            <Button
-                android:id="@+id/filterAll"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="All" />
-
-            <Button
-                android:id="@+id/filterForeground"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Foreground" />
-
-            <Button
-                android:id="@+id/filterBackground"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Background" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingTop="8dp">
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal">
 
             <Button
                 android:id="@+id/windowModeButton"
+                style="@style/Widget.MaterialComponents.Button"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
+                android:layout_marginEnd="4dp"
                 android:layout_weight="1"
-                android:text="Window mode" />
+                android:text="Window mode"
+                android:textSize="13sp" />
 
             <Button
                 android:id="@+id/fullViewButton"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
+                android:layout_marginStart="4dp"
                 android:layout_weight="1"
-                android:text="Full view" />
+                android:text="Full view"
+                android:textSize="13sp" />
         </LinearLayout>
 
         <TextView
-            android:id="@+id/alertBanner"
+            android:id="@+id/floatingBarWarning"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#FFCDD2"
-            android:padding="12dp"
-            android:textColor="#B00020"
-            android:textStyle="bold"
-            android:visibility="gone" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingTop="12dp"
-            android:text="Privacy Guard log"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/alertLog"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="No mic / camera / message-log access recorded yet." />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingTop="12dp"
-            android:text="Cell tower log"
-            android:textStyle="bold" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/cell_tower_note"
-            android:textSize="13sp"
-            android:paddingTop="4dp" />
-
-        <TextView
-            android:id="@+id/cellTowerWarning"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textColor="#B00020"
             android:paddingTop="8dp"
+            android:text="@string/floating_bar_warning"
+            android:textColor="@color/alert_red"
             android:visibility="gone" />
 
-        <Button
-            android:id="@+id/grantCellAccessButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/grant_cell_access" />
-
-        <TextView
-            android:id="@+id/cellTowerLog"
+        <!-- Privacy Guard — red section -->
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="No cell tower change recorded yet." />
+            android:layout_marginTop="12dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="1dp">
 
-        <TextView
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Privacy Guard"
+                    android:textColor="@color/section_privacy"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/alertBanner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:background="@color/alert_bg"
+                    android:padding="12dp"
+                    android:textColor="@color/alert_red"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/alertLog"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="8dp"
+                    android:text="No mic / camera / message-log access recorded yet."
+                    android:textSize="13sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Cell tower log — teal section -->
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="12dp"
-            android:text="Processes"
-            android:textStyle="bold" />
+            android:layout_marginTop="12dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="1dp">
 
-        <TextView
-            android:id="@+id/emptyText"
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Cell tower log"
+                    android:textColor="@color/section_tower"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="4dp"
+                    android:text="@string/cell_tower_note"
+                    android:textColor="@color/muted_text"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/cellTowerWarning"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="8dp"
+                    android:textColor="@color/alert_red"
+                    android:visibility="gone" />
+
+                <Button
+                    android:id="@+id/grantCellAccessButton"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/grant_cell_access"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/cellTowerLog"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="8dp"
+                    android:text="No cell tower change recorded yet."
+                    android:textSize="13sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Processes — blue section -->
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="No processes found. Grant Usage Access to see more."
-            android:visibility="gone" />
+            android:layout_marginTop="12dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="1dp">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/processList"
-            android:layout_width="match_parent"
-            android:layout_height="600dp"
-            android:nestedScrollingEnabled="false" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Processes"
+                    android:textColor="@color/section_processes"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <!-- Filters: equal-width, evenly distributed, selected stands out -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/filterAll"
+                        style="@style/Widget.MaterialComponents.Button"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_marginEnd="4dp"
+                        android:layout_weight="1"
+                        android:text="All"
+                        android:textSize="13sp" />
+
+                    <Button
+                        android:id="@+id/filterForeground"
+                        style="@style/Widget.MaterialComponents.Button"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_marginHorizontal="4dp"
+                        android:layout_weight="1"
+                        android:text="Foreground"
+                        android:textSize="13sp" />
+
+                    <Button
+                        android:id="@+id/filterBackground"
+                        style="@style/Widget.MaterialComponents.Button"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_marginStart="4dp"
+                        android:layout_weight="1"
+                        android:text="Background"
+                        android:textSize="13sp" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/emptyText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="8dp"
+                    android:text="No processes found. Grant Usage Access to see more."
+                    android:visibility="gone" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/processList"
+                    android:layout_width="match_parent"
+                    android:layout_height="600dp"
+                    android:nestedScrollingEnabled="false" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
 </ScrollView>

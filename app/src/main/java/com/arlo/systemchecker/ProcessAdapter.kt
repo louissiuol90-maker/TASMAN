@@ -1,8 +1,10 @@
 package com.arlo.systemchecker
 
+import android.content.res.ColorStateList
 import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -25,7 +27,14 @@ class ProcessAdapter : ListAdapter<ProcessInfo, ProcessAdapter.ViewHolder>(DIFF)
         with(holder.binding) {
             processName.text = item.label
             processPackage.text = item.packageName
+            // Colour-coded chip: green = foreground, orange = background.
             processScope.text = item.scopeLabel
+            processScope.backgroundTintList = ColorStateList.valueOf(
+                ContextCompat.getColor(
+                    root.context,
+                    if (item.isForeground) R.color.chip_foreground else R.color.chip_background
+                )
+            )
             processStatus.text = item.status.name
             // CPU / memory are only real for our own process.
             // Everything else is "—" — never fabricated. See ProcessRepository.

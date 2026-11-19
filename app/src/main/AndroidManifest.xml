@@ -21,6 +21,11 @@
     <!-- For the Privacy Guard foreground service that polls AppOps. -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <!-- Floating mini-bar (Window mode): draw a small translucent
+         bar over other apps. Granted by the user in Settings
+         ("Display over other apps"), not at install. MainActivity
+         explains if it is not granted. -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <!-- AppOps history. This is a signature|privileged permission:
          declaring it does not grant it to an ordinary sideloaded app.
@@ -60,7 +65,6 @@
             android:exported="true"
             android:label="@string/app_name"
             android:resizeableActivity="true"
-            android:supportsPictureInPicture="true"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -70,6 +74,11 @@
 
         <service
             android:name=".PrivacyGuardService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+
+        <service
+            android:name=".FloatingBarService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
     </application>

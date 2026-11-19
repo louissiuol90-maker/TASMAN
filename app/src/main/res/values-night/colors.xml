@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark-theme variants: lighter accents so they stay readable on dark surfaces. -->
+    <color name="colorPrimary">#64B5F6</color>
+    <color name="colorPrimaryVariant">#1565C0</color>
+    <color name="colorAccent">#4DB6AC</color>
+
+    <color name="section_processes">#64B5F6</color>
+    <color name="section_privacy">#EF9A9A</color>
+    <color name="section_tower">#4DB6AC</color>
+
+    <color name="chip_foreground">#66BB6A</color>
+    <color name="chip_background">#FFA726</color>
+    <color name="chip_text">#121212</color>
+
+    <color name="alert_red">#FF8A80</color>
+    <color name="alert_bg">#4A1212</color>
+    <color name="allowed_green">#81C784</color>
+    <color name="allowed_bg">#1B3A1F</color>
+    <color name="warn_amber">#FFB74D</color>
+    <color name="warn_bg">#3E2A00</color>
+
+    <color name="filter_selected_bg">#1565C0</color>
+    <color name="filter_selected_text">#FFFFFF</color>
+    <color name="filter_unselected_bg">#37474F</color>
+    <color name="filter_unselected_text">#ECEFF1</color>
+
+    <color name="muted_text">#B0BEC5</color>
+</resources>
